@@ -92,12 +92,13 @@ class Stage:
             return self.caps[f]
         mt = s.get("media_in", 0.0) + max(0.0, t - t0) * s.get("speed", 1.0)
         c = self.caps.get(f)
-        if c is None or c["t"] > mt:
-            cap = cv2.VideoCapture(path); cap.set(cv2.CAP_PROP_POS_MSEC, mt * 1000); c = self.caps[f] = {"cap": cap, "t": mt, "img": cap.read()[1]}
-        while c["t"] + 1 / FPS <= mt:
+        if c is None or c["t"] > mt + 0.05:
+            cap = cv2.VideoCapture(path); cap.set(cv2.CAP_PROP_POS_MSEC, mt * 1000); im = cap.read()[1]
+            c = self.caps[f] = {"cap": cap, "t": cap.get(cv2.CAP_PROP_POS_MSEC) / 1000, "img": im}
+        while c["t"] + 0.5 / FPS <= mt:            # follow the file's real timestamps (screen recordings are often variable frame rate)
             ok, im = c["cap"].read()
             if not ok: break
-            c["img"] = im; c["t"] += 1 / (c["cap"].get(5) or 30)
+            c["img"] = im; c["t"] = c["cap"].get(cv2.CAP_PROP_POS_MSEC) / 1000
         return c["img"]
 
     def _zoom_rect(self, s, t):

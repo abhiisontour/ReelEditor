@@ -284,7 +284,7 @@ Promise.all([fetch(PRJ+'/words.json').then(r=>r.json()),fetch(PRJ+'/compass.json
         root.append(e,sb); requestAnimationFrame(()=>fitW(e)); up=t=>{ enter(e,t,t0+0.15,0.35,40,0.94); st(sb,t,t0+0.45); };
       }
       else { root.remove(); continue; }
-      updaters.push(t=>{ const end2=t1+0.35, vis=t>=t0-0.1&&t<end2; root.style.opacity=vis?clamp((end2-t)/0.35):0; if(vis) up(t); });
+      updaters.push(t=>{ const hard=S.pip===false, end2=hard?t1:t1+0.35, vis=t>=(hard?t0:t0-0.1)&&t<end2; root.style.opacity=vis?(hard?1:clamp((end2-t)/0.35)):0; if(vis) up(t); });
       continue;
     }
     else { root.remove(); continue; }
