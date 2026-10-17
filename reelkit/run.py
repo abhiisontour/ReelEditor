@@ -7,7 +7,7 @@ Project layout: <project>/input/{clips..., script.txt}; everything else is gener
 import argparse, hashlib, json, os, sys, shutil
 import cv2, numpy as np
 from .common import Project, WEB, FPS, log, node_render, at
-from . import transcribe, cutout, captions, compass, sound, stage
+from . import transcribe, cutout, captions, compass, sound, stage, split
 from .comp import Comp
 
 
@@ -52,6 +52,7 @@ def stage_layers(pr, st, frames=None):
     if frames or st.changed("motion", hm):
         for L in ("behind", "front") + (("stage",) if has_stage else ()): node_render(os.path.join(WEB, "motion.html"), f"p={pr.root}&layer={L}", pr.p("layers", L), n)
         if not frames: st.done("motion", hm)
+    split.render_hook(pr, node_render, WEB)
 
 
 def analyze(a):
@@ -69,8 +70,9 @@ def analyze(a):
     if hook:   # hook pulse when the key word is actually said
         key = hook[1].strip("…. ").lower(); hit = next((w["i"] for w in W["words"] if w["clean"] == key), None)
         if hit is not None: C["scenes"][0]["parts"]["said"] = {"word": hit}
+    split_from_script(C, an, W, hook, a.day)
     for k, sg in enumerate(an.get("segments", [])):
-        if sg["kind"] == "talk": continue
+        if sg["kind"] in ("talk", "broll", "split"): continue
         w0 = next((w["i"] for w in W["words"] if w.get("si", -1) >= sg["t0"]), None); w1 = next((w["i"] for w in W["words"] if w.get("si", -1) >= sg["t1"]), None)
         if w0 is None: continue
         sc = {"id": f"{sg['kind'].upper()}{k}", "in": {"word": w0}, "out": {"word": w1} if w1 is not None else None, "note": sg["note"], "colors": ["sky", "mint"]}
@@ -85,6 +87,44 @@ def analyze(a):
     stage_enhance(pr, st, True)
     closing_sheet(pr)
     log("analyze done. Next: design scenes in compass.json, then `storyboard`.")
+
+
+def split_from_script(C, an, W, hook, day, total=75):
+    """[BROLL: note | file | in=s] and [SPLIT: note] spans -> compass.split segments. A span starting at the first word
+    becomes the series opener: static hook + series pill on the seam for 0-3.5 s (it replaces the HOOK scene and badge)."""
+    ws = W["words"]; segs = []
+    for sg in an.get("segments", []):
+        if sg["kind"] not in ("broll", "split"): continue
+        w0 = next((w["i"] for w in ws if w.get("si", -1) >= sg["t0"]), None); w1 = next((w["i"] for w in ws if w.get("si", -1) >= sg["t1"]), None)
+        if w0 is None: continue
+        t0 = 0.0 if w0 == 0 else round(max(ws[w0 - 1]["end"], ws[w0]["start"] - 0.12), 3)
+        t1 = round(ws[w1]["start"] - 0.05, 3) if w1 is not None else round(ws[-1]["end"] + 0.6, 3)
+        top = {"media": sg["file"], "in": float(sg.get("opts", {}).get("in", 0))} if sg["kind"] == "broll" and sg.get("file") else \
+              {"scenes": [], "zoom": 1.15, "todo": "design: icon_tiles/cards scenes for the top half (" + sg["note"] + ")"}
+        segs.append({"from": {"time": t0}, "to": {"time": t1}, "note": sg["note"], "top": top})
+    if not segs: return
+    for x, y in zip(segs, segs[1:]):          # back-to-back spans share one boundary (no gap, no overlap)
+        if y["from"]["time"] - x["to"]["time"] < 0.4: x["to"] = {"time": y["from"]["time"]}
+    if segs[0]["from"]["time"] == 0.0 and hook:
+        o = segs[0]; HOOK_T = 3.5
+        if o["to"]["time"] > HOOK_T + 0.6:   # hook overlay only for the first 3.5 s; the same B-roll continues after it
+            rest = {**o, "from": {"time": HOOK_T}, "top": {**o["top"]}}
+            if "media" in rest["top"]: rest["top"]["in"] = rest["top"]["in"] + HOOK_T
+            o["to"] = {"time": HOOK_T}; segs.insert(1, rest)
+            if rest["to"]["time"] - HOOK_T < 1.0 and len(segs) > 2 and segs[2]["from"]["time"] == rest["to"]["time"]:
+                segs.pop(1); segs[1]["from"] = {"time": HOOK_T}          # too short to show: cut straight to the next B-roll
+        elif len(segs) > 1 and segs[1]["from"]["time"] == o["to"]["time"]:
+            o["to"] = {"time": HOOK_T}; segs[1]["from"] = {"time": HOOK_T}
+        o["overlay"] = "hook"
+        C["scenes"] = [s for s in C["scenes"] if s["type"] not in ("text_hook", "badge")]
+        C["captions"]["hide_until"] = o["to"]["time"]; C["sound"]["quiet_until"] = o["to"]["time"]
+        hk = {"lines": hook, "colors": ["peach", "coral", "rose"]}
+        if day is not None: hk["series"] = f"Day {day:02d}/{total} · Of making your travel easy"
+        C["split"] = {"layout": {}, "hook": hk, "segments": segs}
+    else:
+        C["split"] = {"layout": {}, "segments": segs}
+    C["sound"]["whoosh"] = "layout"
+    C["camera"] = [k for k in C["camera"] if k.get("why") != "opening settle" and not (k.get("at") == {"time": 0.0} and k.get("dur") == 0.6)] or [{"at": {"time": 0.0}, "to": 1.0, "dur": 0.0}]
 
 
 def media_sheet(a):
@@ -147,6 +187,11 @@ def build(a):
 def cover(a):
     pr = Project(a.project); C = pr.compass; cv = C["cover"]; W = pr.load("words.json"); comp = Comp(pr)
     n = cv["frame"] if isinstance(cv["frame"], int) else W["frames"] - 6
+    if comp.split is not None and comp.split.segs and comp.split.segs[0][2].get("overlay") == "hook":
+        # series cover = the opener's split look: opener B-roll on top, hook on the seam, closing smile below
+        a0, b0, g = comp.split.segs[0]; g = {**g, "_top": comp.face[n]["y0"] - 40}
+        fg, al = comp.get(n); im = comp.split.frame(a0 + (b0 - a0) // 2, fg, al, (a0, b0, g), comp.layers, comp.bd)
+        cv2.imwrite(pr.p("renders", f"cover_{C['name']}.jpg"), im, [cv2.IMWRITE_JPEG_QUALITY, 95]); return
     hook = next((s for s in C["scenes"] if s["type"] == "text_hook"), None)
     tf = cv.get("text_frame") or (int((at(hook["out"], W["words"], 3.0) - 0.8) * FPS) if hook else n)
     tmp = pr.p("work", "cover_layers"); os.makedirs(tmp, exist_ok=True)

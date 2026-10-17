@@ -52,11 +52,11 @@ def asr(pr: Project):
 
 
 norm = lambda s: re.sub(r"[^a-z0-9]", "", s.lower())
-TAG = re.compile(r"\[(TALK|DEMO|SCREEN|ANIMATION|ANIM)\s*:?\s*([^\]]*)\]", re.I)
+TAG = re.compile(r"\[(TALK|DEMO|SCREEN|ANIMATION|ANIM|BROLL|SPLIT)\s*:?\s*([^\]]*)\]", re.I)
 
 
 def parse_script(raw):
-    """Script markup: [TALK] ..., [DEMO: note | file.mp4] ..., [ANIMATION: note] ...
+    """Script markup: [TALK] ..., [DEMO: note | file.mp4] ..., [ANIMATION: note] ..., [BROLL: note | file.mp4 | in=5.8] ..., [SPLIT: note] ...
     Returns (plain script text, segments with script-token ranges)."""
     segs, plain, ntok, pos = [], [], 0, 0
     cur = {"kind": "talk", "note": "", "file": None, "t0": 0}
@@ -66,7 +66,8 @@ def parse_script(raw):
         cur["t1"] = ntok; segs.append(cur)
         kind = {"screen": "demo", "anim": "animation"}.get(m.group(1).lower(), m.group(1).lower())
         parts = [p.strip() for p in m.group(2).split("|")]
-        cur = {"kind": kind, "note": parts[0] if parts else "", "file": parts[1] if len(parts) > 1 and parts[1] else None, "t0": ntok}
+        opts = dict(p.split("=", 1) for p in parts[2:] if "=" in p)
+        cur = {"kind": kind, "note": parts[0] if parts else "", "file": parts[1] if len(parts) > 1 and parts[1] else None, "opts": opts, "t0": ntok}
         pos = m.end()
     toks = [t for t in re.split(r"\s+", raw[pos:].strip()) if norm(t)]; plain += toks; ntok += len(toks)
     cur["t1"] = ntok; segs.append(cur)

@@ -86,7 +86,28 @@ Promise.all([fetch(PRJ+'/words.json').then(r=>r.json()),fetch(PRJ+'/compass.json
     const root=el('div','scene'); document.body.appendChild(root); const P=S.parts||{}, pt=k=>T(P[k]);
     let up=()=>{};
     const fitW=(e,maxw)=>{let f=parseFloat(e.style.fontSize); while(e.scrollWidth>e.clientWidth+1&&f>100){f-=6;e.style.fontSize=f+'px';}};
-    if(S.type==='text_hook'&&LAYER==='behind'){
+    if(S.type==='text_hook'&&S.static&&LAYER==='front'){
+      // Series opener: series title + text hook fully on screen from frame 0, perfectly still (front layer = unaffected by camera moves).
+      // The only motion is ONE accent on the key word: 'underline' (brush stroke draws in) or 'glint' (a light sweep crosses it).
+      const ki=S.key_line??1, tops=S.tops||[286,338,536], acc=S.accent||'none', a0=pt('accent')??t0+0.1;
+      if(S.series){ const [d,rest]=S.series.split('·').map(x=>x.trim());
+        root.appendChild(el('div','a',{left:'0',width:'1000px',top:'236px',display:'flex',justifyContent:'center'},
+          `<div style="font:600 24px Inter;letter-spacing:.2em;text-transform:uppercase;color:#A3A3AB;padding:12px 26px;border-radius:999px;background:rgba(245,245,244,.06);border:1.5px solid rgba(245,245,244,.14)"><b style="color:#F5F5F4;font-weight:600">${d}</b>${rest?' &nbsp;·&nbsp; '+rest:''}</div>`)); }
+      let keyEl=null, inner=null;
+      S.lines.forEach((L,i)=>{
+        if(i===ki){ keyEl=el('div','a big',{left:'60px',width:'880px',top:tops[i]+'px',fontSize:(S.key_px||196)+'px'}); inner=el('span','gt',{display:'inline-block',backgroundImage:grad(cs)},L); keyEl.appendChild(inner); root.appendChild(keyEl); }
+        else root.appendChild(el('div','a hk',{left:'0',width:'1000px',top:tops[i]+'px',fontSize:(S.line_px||58)+'px'}, L.replace('…',`<b style="color:${col(cs[1]||cs[0])}">…</b>`)));
+      });
+      let ul=null, sheen=null;
+      requestAnimationFrame(()=>{ fitW(keyEl); const w=inner.offsetWidth, h=inner.offsetHeight, x=60+(880-w)/2, y=tops[ki]+h*0.86;
+        if(acc==='none'){}
+        else if(acc==='underline'){ ul=el('div','a',{left:(x+w*0.04)+'px',top:y+'px'},`<svg width="${w*0.92}" height="40" style="overflow:visible"><defs><linearGradient id="ug" x1="0" x2="1"><stop offset="0" stop-color="${col(cs[0])}"/><stop offset="1" stop-color="${col(cs[cs.length-1])}"/></linearGradient></defs><path d="M4 22 C ${w*0.25} 8, ${w*0.55} 30, ${w*0.92-4} 14" fill="none" stroke="url(#ug)" stroke-width="11" stroke-linecap="round"/></svg>`); root.insertBefore(ul,keyEl); const p=ul.querySelector('path'), L=p.getTotalLength(); p.style.strokeDasharray=L; p.style.strokeDashoffset=L; ul.dataset.L=L; }
+        else { sheen=el('span','',{position:'absolute',left:'0',top:'0',width:'100%',height:'100%',backgroundImage:'linear-gradient(100deg,rgba(255,255,255,0) 42%,rgba(255,255,255,.95) 50%,rgba(255,255,255,0) 58%)',backgroundSize:'300% 100%',WebkitBackgroundClip:'text',backgroundClip:'text',color:'transparent',padding:'0 .08em'},S.lines[ki]); inner.style.position='relative'; inner.appendChild(sheen); }
+      });
+      up=t=>{ if(ul){ const p=ul.querySelector('path'); p.style.strokeDashoffset=(+ul.dataset.L)*(1-easeOut((t-a0)/0.45)); }
+        if(sheen){ const q=clamp((t-a0)/0.75); sheen.style.backgroundPosition=`${100-q*100}% 0`; sheen.style.opacity=t<a0?0:(q<1?1:0); } };
+    }
+    else if(S.type==='text_hook'&&!S.static&&LAYER==='behind'){
       const ki=S.key_line??1, tops=S.tops||[236,292,520]; const lines=S.lines.map((L,i)=>{
         if(i===ki){const e=el('div','a big gt',{left:'60px',width:'880px',top:tops[i]+'px',fontSize:(S.key_px||230)+'px',backgroundImage:grad(cs)},L); root.appendChild(e); return e;}
         const e=el('div','a hk',{left:'0',width:'1000px',top:tops[i]+'px'}, L.split(' ').map(w=>`<span>${w.replace('…','<b style="color:'+col(cs[1]||cs[0])+'">…</b>')}</span>`).join(' ')); root.appendChild(e); return e;});

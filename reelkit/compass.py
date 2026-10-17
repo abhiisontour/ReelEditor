@@ -62,6 +62,17 @@ def render_md(C, W):
     L += ["", "## 2. Framing & picture", "", f"- Zoom **{fr['scale']}×**, subject centred (centre x={fr.get('subject_cx_src','auto')} in source), desk {'found' if fr.get('table_line') else 'not found'}.",
           f"- Props removed: {', '.join(z.get('what','zone') for z in fr.get('prop_zones', [])) or 'none found'}.",
           "- Deflicker on, skin smoothing 55%, gentle contrast/clarity/sharpen (off skin and edges), warmth +1." + (f" Overrides: {C['picture']}" if C.get("picture") else "")]
+    SP = C.get("split", {})
+    if SP.get("segments"):
+        hk = SP.get("hook") or {}
+        L += ["", "## Layout (split screen = B-roll / graphics on top, you head-to-waist below; everything else full frame)", "",
+              "| From | To | Top half | Note |", "|---|---|---|---|"]
+        for g in SP["segments"]:
+            f = g["from"] if isinstance(g["from"], dict) else {"time": g["from"]}; t = g["to"] if isinstance(g["to"], dict) else {"time": g["to"]}
+            T = g["top"]; top = f"{T['media']} (from {T.get('in', 0)}s)" if T.get("media") else ("graphics: " + ", ".join(T.get("scenes", [])) if T.get("scenes") else "graphics: TODO")
+            if g.get("overlay") == "hook": top += " + static hook" + (f" + pill '{hk.get('series')}'" if hk.get("series") else "")
+            L.append(f"| {_t(f, ws)} | {_t(t, ws)} | {top} | {g.get('note', '')} |")
+        if hk: L += ["", f"**Text hook (static, no animation):** {hk['lines'][0]} / *{hk['lines'][1]}* {hk['lines'][2]}"]
     L += ["", "## 3. Captions", "", f"Hidden until {C['captions'].get('hide_until',0):.1f}s (text hook on screen). *Italic* = big key word.", ""]
     line = []
     for ch in C["captions"]["chunks"]:
@@ -73,7 +84,7 @@ def render_md(C, W):
         L.append(f"| {s['id']} | {tw}{_t(trig, ws)} | {_t(s.get('out'), ws) if s.get('out') else 'end'} | {SUMMARY.get(s['type'], lambda s: s['type'])(s)} | {', '.join(s.get('colors', []))} | {s.get('layer', 'front' if s['type'] in ('cards','list','icon_tiles','badge') else 'behind')} |")
     L += ["", "**Camera:** " + "; ".join(f"{_t(k['at'], ws)} → {k['to']:.2f}× ({k.get('why','push')})" for k in C["camera"])]
     S = C["sound"]; M = S["music"]
-    L += ["", "## 5. Sound", "", f"- No effects before {S['quiet_until']:.1f}s. Whooshes subtle (−27 dB). Voice cleaned (rumble, hiss, de-ess, light compression).",
+    L += ["", "## 5. Sound", "", f"- No effects before {S['quiet_until']:.1f}s. Whooshes subtle (−27 dB)" + (", only when the layout changes into a split." if S.get("whoosh") == "layout" else ".") + " Voice cleaned (rumble, hiss, de-ess, light compression).",
           f"- Music: {'on' if M['on'] else 'off'} — {M['key']} major, {M['bpm']} bpm, {M['level_db']} dB under voice, ducks {M['duck_db']} dB while you talk.",
           "- Master −14 LUFS, true peak −1.5 dBTP.", "", "| Time | Effect | Cue | dB |", "|---|---|---|---|"]
     for c in C.get("_cues_preview", []): L.append(f"| {c['t']:.2f}s | {c['sfx']} | {c['cue']} | {c['gain_db']} |")

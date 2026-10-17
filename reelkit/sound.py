@@ -60,9 +60,17 @@ def auto_cues(pr: Project):
     def add(t, name, why, db=None):
         if t is None: return
         cues.append({"t": round(max(0.0, t), 3), "sfx": name, "cue": why, "gain_db": DEFAULT_DB[name] if db is None else db})
+    layout_only = S.get("whoosh") == "layout"     # split-screen reels: whoosh only when the layout changes into a split
+    if C.get("split", {}).get("segments"):
+        from .split import windows
+        wins = windows(C, ws); prev_end = None
+        for t0, t1, g in wins:
+            if t0 >= quiet and (prev_end is None or abs(prev_end - t0) > 0.05): add(t0 - 0.12, "whoosh", "into split")
+            prev_end = t1
     for sc in C.get("scenes", []):
         t0 = T(sc.get("in"), 0.0); P = sc.get("parts", {}); typ = sc["type"]
-        if t0 >= quiet and typ not in ("badge", "text_hook"): add(t0 - 0.12, "whoosh", f"scene change {sc['id']}")
+        if t0 >= quiet and typ not in ("badge", "text_hook") and not (layout_only and typ not in ("screen", "bars", "steps", "compare", "title_card")):
+            add(t0 - 0.12, "whoosh", f"scene change {sc['id']}")
         if typ == "bubbles": [add(t0 + i * 0.07, "pop", f"bubble {i+1}") for i in range(4)]
         if typ == "route": add(t0 + 0.1, "plane", "plane pass")
         if typ == "streak_grid": add(t0, "tap", "first tile"); add(T(P.get("grid")), "cascade", "grid fills")
@@ -84,7 +92,7 @@ def auto_cues(pr: Project):
         if typ == "steps": [add(T(x.get("at"), t0 + 0.3 + i * 0.5), "tap", f"step {i+1}") for i, x in enumerate(sc.get("steps", []))]
         if typ == "compare": add(T((sc.get("left") or {}).get("at"), t0 + 0.2), "tap", "left card"); add(T((sc.get("right") or {}).get("at"), t0 + 0.6), "tap", "right card")
     for k in C.get("camera", []):
-        if k.get("dur", 0.3) == 0:
+        if k.get("dur", 0.3) == 0 and not layout_only:
             t = T(k.get("at"))
             if t is not None and t >= quiet and not any(c["sfx"] == "whoosh" and abs(c["t"] - (t - 0.18)) < 0.35 for c in cues): add(t - 0.18, "whoosh", "snap push-in")
     add(T(S.get("chime_at"), ws[-1]["start"]), "chime", "close chime")

@@ -1,4 +1,4 @@
-"""Compositor. Stack: backdrop -> BEHIND layer -> cut-out (light-wrapped onto whatever is behind it) -> camera push-in
+"""Compositor. Split-screen segments (split.py) take over whole frames; otherwise the stack is: backdrop -> BEHIND layer -> cut-out (light-wrapped onto whatever is behind it) -> camera push-in
 -> FRONT layer -> captions. Writes layers/picture.mp4 (video only) or stills."""
 import os, subprocess, cv2, numpy as np
 from .common import Project, reader, writer, at, W, H, FPS, log
@@ -28,6 +28,8 @@ class Comp:
         from .stage import Stage
         self.stage = Stage(pr, self.words) if any(x["type"] in ("screen", "bars", "steps", "compare", "title_card") for x in C.get("scenes", [])) else None
         self.face = face
+        from .split import Split
+        self.split = Split(pr, self) if C.get("split", {}).get("segments") else None
 
     def cam(self, t):
         s = 1.0
@@ -44,7 +46,18 @@ class Comp:
         im = im.astype(np.float32); return im[..., :3], im[..., 3:] / 255
 
     def frame(self, n, fg, a, layers=None, cam=None, subject_dy=0):
-        L = layers or self.layers; t = n / FPS; bg = self.bd.copy()
+        L = layers or self.layers; t = n / FPS
+        if self.split is not None and subject_dy == 0:
+            seg = self.split.active(n)
+            if seg: return self.split.frame(n, fg, a, seg, L, self.bd)
+        bg = self.bd.copy()
+        op = self.C.get("look", {}).get("opening")
+        if op == "sunrise" and t < 1.6:   # visual hook: warm light rises behind the subject, then settles to the normal glow
+            p = 1 - (1 - min(t / 1.1, 1)) ** 3; fade = 1 - max(0.0, (t - 1.1) / 0.5)
+            yy = np.arange(H, dtype=np.float32)[:, None]; xx = np.arange(W, dtype=np.float32)[None, :]
+            cy = H * (1.05 - 0.62 * p); d = np.sqrt(((xx - 540) / (0.75 * W)) ** 2 + ((yy - cy) / (0.42 * H)) ** 2)
+            g = (np.clip(1 - d, 0, 1) ** 1.3)[..., None] * 0.34 * fade
+            bg = bg + g * (np.array([120, 190, 255], np.float32) - bg)
         if self.bloom and t < self.bloom:
             k = 1 - (1 - t / self.bloom) ** 3; base = np.array([10, 9, 9], np.float32); bg = base + (bg - base) * k
         c, al = self.rgba(f"{L['behind']}/{n:05d}.png")

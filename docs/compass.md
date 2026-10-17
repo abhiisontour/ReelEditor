@@ -57,6 +57,28 @@ Every scene: `id`, `type`, `in`, `out`, `colors`, optional `layer` (`behind` = b
 | `title_card` | `text`, `sub`, `px` |
 Use `python -m reelkit.run media-sheet <project> --name <file>` to get a timestamped contact sheet with a 10% grid, and read zoom/highlight rects off it. Captions are hidden during portrait (phone) demos unless `captions.show_during_demo` is true.
 
+## Split screen (series format)
+B-roll or graphics in the top half (y 0–960), you head-to-waist in the bottom half (scale 0.72, desk faded under your hands), hard cuts.
+```jsonc
+"split": {
+  "layout": {"scale": 0.72, "head_y": 1010, "seam": 960, "desk_fade_y": 1335},          // optional overrides
+  "hook": {"lines": ["You can send me", "negative", "comments if…"], "series": "Day 00/75 · Of making your travel easy",
+           "colors": ["peach", "coral", "rose"]},                                         // static overlay, no animation
+  "segments": [
+    {"from": {"time": 0}, "to": {"time": 3.5}, "overlay": "hook",
+     "top": {"media": "01_comments.mp4", "in": 1.1, "crop": [20, 600, 980, 871]}},     // crop = source x,y,w,h (optional; default = fill)
+    {"from": {"time": 3.5}, "to": {"time": 7.6}, "top": {"media": "03_drive.mp4", "in": 5.8}},
+    {"from": {"time": 13.2}, "to": {"time": 18.25}, "top": {"scenes": ["TOOLS", "SAVE"], "zoom": 1.15}}  // graphics: scene layers scaled into the top half
+  ]}
+```
+Rules:
+- The **opener** segment (0–3.5 s, `overlay: "hook"`) carries the static hook on the seam and the series pill at the top; captions and SFX start at 3.5 s (`captions.hide_until`, `sound.quiet_until`). No `text_hook` scene and no badge when the opener is split.
+- **Back-to-back segments keep you in exactly the same place**: only the top half changes at the cut. Never put a full-frame moment shorter than ~2 s between two splits; extend the split instead.
+- Captions sit on the seam during splits (auto-moved) and on the chest during full frame.
+- Graphics tops use normal scenes (`icon_tiles`, `cards`, `list`…) named in `top.scenes`; they render on the usual layer and get scaled (`zoom`, default 1.15) into the top half.
+- `sound.whoosh: "layout"`: whoosh only when cutting from full frame into a split (plus stage scenes); no per-scene or snap whooshes.
+- The cover becomes the opener's split look (opener B-roll + hook) with the `cover.frame` smile below.
+
 ## Script markup
 ```
 [TALK] Planning a trip and not sure about the weather?
@@ -64,6 +86,7 @@ Use `python -m reelkit.run media-sheet <project> --name <file>` to get a timesta
 [ANIMATION: rainfall rising June to August] Rain peaks in July…
 [TALK] Follow for tomorrow's tool.
 ```
+Split-screen tags: `[BROLL: note | file.mp4 | in=5.8]` (B-roll on top from 5.8 s into the clip) and `[SPLIT: note]` (graphics on top; design the scenes and list them in `top.scenes`). A BROLL/SPLIT span starting at the first word becomes the series opener (hook overlay for 0–3.5 s; the same clip continues after it, or the next span takes over at 3.5 s if it starts within a second).
 Tags are stripped before alignment; each tagged span becomes a scene stub (`screen` for DEMO, `title_card` with `todo` for ANIMATION) on the right words. Demo media goes in `input/media/` (the talking-head clips stay directly in `input/`).
 
 Graphics live in the space above the head (y ≈ 230–610); captions live on the chest (y 1180–1540); nothing in the top 220 / bottom 380 / right 140 px.

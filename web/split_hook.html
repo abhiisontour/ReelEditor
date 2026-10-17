@@ -1,0 +1,31 @@
+<!doctype html><html><head><meta charset="utf-8">
+<!-- reelkit split-screen opener overlay: static series pill + 2-line text hook on the seam. ?p=/abs/project, reads compass.split.hook -->
+<style>
+@font-face{font-family:IS;font-style:italic;src:url(node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-italic.woff2)}
+@font-face{font-family:Inter;font-weight:600;src:url(node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2)}
+html,body{margin:0;width:1080px;height:1920px;background:transparent;overflow:hidden}
+.pill{position:absolute;top:236px;left:0;width:1000px;display:flex;justify-content:center}
+.pill div{font:600 24px Inter;letter-spacing:.2em;text-transform:uppercase;color:#A3A3AB;padding:12px 26px;border-radius:999px;background:rgba(9,9,10,.82);border:1.5px solid rgba(245,245,244,.18);white-space:nowrap}
+.pill b{color:#F5F5F4;font-weight:600}
+.h{position:absolute;left:0;width:1000px;text-align:center;white-space:nowrap;filter:drop-shadow(0 4px 18px rgba(0,0,0,.7))}
+.l1{font:600 62px Inter;color:#F5F5F4}
+.l2{font-family:IS;font-style:italic;font-size:132px;line-height:1}
+.l2 .k{-webkit-background-clip:text;background-clip:text;color:transparent;padding-right:6px}
+.l2 .r{color:#F5F5F4;font-family:Inter;font-style:normal;font-weight:600;font-size:62px}
+</style></head><body>
+<div class="pill" id="pill"></div><div class="h l1" id="l1"></div><div class="h l2" id="l2"></div>
+<script>
+const P=new URLSearchParams(location.search).get('p');
+const esc=s=>String(s||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+fetch(P+'/compass.json').then(r=>r.json()).then(C=>{
+  const S=C.split||{}, K=S.hook||{}, L=S.layout||{}, seam=L.seam||960, pal=C.palette||{};
+  const cs=(K.colors||['peach','coral','rose']).map(c=>pal[c]||c), lines=K.lines||['','',''];
+  if(K.series){ const p=K.series.split('·'); document.getElementById('pill').innerHTML=`<div><b>${esc(p[0].trim())}</b>${p.length>1?' &nbsp;·&nbsp; '+esc(p.slice(1).join('·').trim()):''}</div>`; }
+  const l1=document.getElementById('l1'), l2=document.getElementById('l2');
+  l1.textContent=lines[0]||''; l1.style.top=(seam-160)+'px';
+  l2.innerHTML=`<span class="k" style="background-image:linear-gradient(90deg,${cs.join(',')})">${esc(lines[1])}</span> <span class="r">${esc(lines[2])}</span>`;
+  l2.style.top=(seam-94)+'px';
+  document.fonts.ready.then(()=>{ for(const e of [l1,l2]){ let f=1; while(e.scrollWidth>980&&f>0.6){f-=0.04; e.style.transform=`scale(${f})`; e.style.transformOrigin='50% 50%'; if(e.getBoundingClientRect().width<=980) break;} }
+    window.renderFrame=()=>{}; window.ready=true; });
+});
+</script></body></html>

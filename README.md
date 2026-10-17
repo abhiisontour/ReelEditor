@@ -33,12 +33,13 @@ Outputs in `$P/renders/`: `final_<name>.mp4` (1080×1920, 30 fps, H.264, −14 L
 | props, deflicker, skin, grade | `cutout.enhance` | compass.picture, framing.prop_zones | layers/matte.mkv, fg.mkv |
 | captions layer | `captions.py` + `web/captions.html` | compass.captions | layers/captions/ |
 | motion layers | `web/motion.html` (scene library) | compass.scenes | layers/behind/, layers/front/ |
-| composite | `comp.py` | compass.framing, camera, look | layers/picture.mp4 |
+| composite (+ split screen) | `comp.py`, `split.py` | compass.framing, camera, look, split | layers/picture.mp4 |
 | sound + master + export + cover | `sound.py`, `run.cover` | compass.sound, cover | renders/ |
 
 ## Scene library (`compass.scenes[].type`)
 Talking-head: `text_hook`, `big_word`, `bubbles`, `route`, `streak_grid`, `calendar`, `cards`, `list`, `icon_tiles` (objects: `coin`, `clock`, `calm`, or any icon as a glossy 3D chip), `stat` (count-up), `badge`, `cta`.
 Stage (full-screen, you shrink into a corner circle): `screen` (screen recordings / screenshots with zooms, highlight boxes, taps), `bars`, `steps`, `compare`, `title_card`.
-Script markup `[TALK]`, `[DEMO: note | file]`, `[ANIMATION: note]` marks these segments; demo media goes in `input/media/`.
+Split screen (series format, `split.py`): B-roll or graphics on top, you head-to-waist below, static hook + series pill on the seam for the first 3.5 s.
+Script markup `[TALK]`, `[DEMO: note | file]`, `[ANIMATION: note]`, `[BROLL: note | file | in=s]`, `[SPLIT: note]` marks these segments; demo media and B-roll go in `input/media/`.
 Icons: wrench bolt check x star heart pin plane wallet camera ticket train bed food clock calendar bag map phone sun rupee.
 Full field reference: [docs/compass.md](docs/compass.md).
