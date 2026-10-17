@@ -1,0 +1,2 @@
+{"name":"reelkit-web","private":true,"type":"module",
+ "dependencies":{"playwright-core":"1.48.2","@fontsource/instrument-serif":"5.3.0","@fontsource/inter":"5.3.0","@fontsource/google-sans-code":"5.3.2"}}
