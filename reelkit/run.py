@@ -168,7 +168,7 @@ def storyboard(a):
         pts.append(min(t1 - 0.1, t0 + max(0.45, (t1 - t0) * 0.75)))
     frames = sorted(set(min(W["frames"] - 1, int(t * FPS)) for t in pts))
     st = State(pr); stage_layers(pr, st, ",".join(map(str, frames)))
-    C["_cues_preview"] = sound.auto_cues(pr); pr.save("compass.json", C)
+    S = C.get("sound", {}); C["_cues_preview"] = S.get("cues") if S.get("cues_mode") == "manual" else sound.auto_cues(pr); pr.save("compass.json", C)
     Comp(pr).sheet(frames, pr.p("qc", "storyboard.jpg"))
     open(pr.p("compass.md"), "w").write(compass.render_md(C, W))
     log("storyboard + compass.md ready:", pr.p("qc", "storyboard.jpg"), pr.p("compass.md"))

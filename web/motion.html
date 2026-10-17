@@ -57,6 +57,7 @@ html,body{margin:0;width:1080px;height:1920px;background:transparent;overflow:hi
 <script>
 const Q=new URLSearchParams(location.search), PRJ=Q.get('p'), LAYER=Q.get('layer')||'behind', FPS=30, OUT=0.15;
 const clamp=v=>Math.min(Math.max(v,0),1), easeOut=t=>1-Math.pow(1-clamp(t),3), easeOutBack=t=>{t=clamp(t);const c=1.6;return 1+(c+1)*Math.pow(t-1,3)+c*Math.pow(t-1,2)};
+const easeInOut=t=>{t=clamp(t);return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2};
 const hex=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16)), rgba=(h,a)=>{const[r,g,b]=hex(h);return `rgba(${r},${g},${b},${a})`};
 const el=(tag,cls,style,html)=>{const e=document.createElement(tag); if(cls)e.className=cls; if(style)Object.assign(e.style,style); if(html!=null)e.innerHTML=html; return e;};
 const enter=(e,t,t0,d=0.3,dy=24,s0=1,extra='')=>{ if(!e) return 0; const p=easeOut((t-t0)/d); e.style.opacity=t<t0?0:p; e.style.transform=`translateY(${(1-p)*dy}px) scale(${s0+(1-s0)*p}) ${extra}`; return p; };
@@ -106,6 +107,45 @@ Promise.all([fetch(PRJ+'/words.json').then(r=>r.json()),fetch(PRJ+'/compass.json
       });
       up=t=>{ if(ul){ const p=ul.querySelector('path'); p.style.strokeDashoffset=(+ul.dataset.L)*(1-easeOut((t-a0)/0.45)); }
         if(sheen){ const q=clamp((t-a0)/0.75); sheen.style.backgroundPosition=`${100-q*100}% 0`; sheen.style.opacity=t<a0?0:(q<1?1:0); } };
+    }
+    else if(S.type==='month_hunt'&&LAYER===(S.layer||'behind')){
+      // Visual hook for "find the best month": 12 dark-glass month tiles; a glossy magnifying glass hunts across them,
+      // lighting up and enlarging the tile under the lens. Optional S.land (tile index) + part 'land': the lens settles there.
+      const M=S.months||['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], NC=S.cols||4, NR=Math.ceil(M.length/NC);
+      const tw=S.tile_w||196, th=S.tile_h||118, gap=20, gw=NC*tw+(NC-1)*gap, x0=(S.cx||500)-gw/2, y0=S.top||330;
+      const c0=col(cs[0]), c1=col(cs[1]||cs[0]), c2=col(cs[2]||cs[1]||cs[0]);
+      const tiles=M.map((m,i)=>{ const r=Math.floor(i/NC), c=i%NC, x=x0+c*(tw+gap), y=y0+r*(th+gap);
+        const e=el('div','a',{left:x+'px',top:y+'px',width:tw+'px',height:th+'px',borderRadius:'26px',background:'linear-gradient(160deg,rgba(245,245,244,.10),rgba(245,245,244,.03))',border:'1.5px solid rgba(245,245,244,.13)',boxShadow:'0 14px 30px rgba(0,0,0,.35)',overflow:'hidden'},
+          `<div class="lit" style="position:absolute;inset:0;opacity:0;background:linear-gradient(140deg,${c0},${c1} 55%,${c2})"></div><div class="gl" style="position:absolute;left:0;right:0;top:0;height:46%;background:linear-gradient(180deg,rgba(255,255,255,.22),rgba(255,255,255,0));opacity:.5"></div><div class="m" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:600 40px Inter;letter-spacing:.16em;text-transform:uppercase;color:#F5F5F4;opacity:.5">${m}</div>`);
+        root.appendChild(e); return {e,cx:x+tw/2,cy:y+th/2}; });
+      const R=S.lens_r||92, gid='lg'+S.id;
+      const lens=el('div','a',{left:'0',top:'0',width:'1px',height:'1px'},
+        `<svg width="${R*4}" height="${R*4}" viewBox="0 0 ${R*4} ${R*4}" style="position:absolute;left:${-R*1.25}px;top:${-R*1.25}px;overflow:visible;filter:drop-shadow(0 18px 26px rgba(0,0,0,.55))">
+          <defs><linearGradient id="${gid}r" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${lighten(c0,.45)}"/><stop offset=".5" stop-color="${c0}"/><stop offset="1" stop-color="${darken(c1,.25)}"/></linearGradient>
+          <linearGradient id="${gid}h" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${lighten(c1,.15)}"/><stop offset=".5" stop-color="${darken(c1,.25)}"/><stop offset="1" stop-color="${darken(c2,.55)}"/></linearGradient>
+          <radialGradient id="${gid}g" cx=".35" cy=".3" r=".9"><stop offset="0" stop-color="rgba(255,255,255,.28)"/><stop offset=".55" stop-color="rgba(255,255,255,.05)"/><stop offset="1" stop-color="rgba(255,255,255,.12)"/></radialGradient></defs>
+          <g transform="translate(${R*1.25} ${R*1.25})">
+          <path d="M ${R*0.70} ${R*0.70} L ${R*1.62} ${R*1.62}" stroke="url(#${gid}h)" stroke-width="${R*0.36}" stroke-linecap="round"/>
+          <path d="M ${R*0.78} ${R*0.78} L ${R*1.0} ${R*1.0}" stroke="${darken(c1,.15)}" stroke-width="${R*0.42}" stroke-linecap="round"/>
+          <circle r="${R}" fill="url(#${gid}g)"/>
+          <circle r="${R}" fill="none" stroke="url(#${gid}r)" stroke-width="${R*0.2}"/>
+          <path d="M ${-R*0.62} ${-R*0.2} A ${R*0.66} ${R*0.66} 0 0 1 ${-R*0.2} ${-R*0.62}" fill="none" stroke="rgba(255,255,255,.75)" stroke-width="${R*0.09}" stroke-linecap="round"/></g></svg>`);
+      root.appendChild(lens);
+      const order=S.order||[2,9,5,0,7,11,4,1,10,6,3,8], step=S.step||0.42, mv=step*0.62;
+      const land=S.land, tl=pt('land');
+      const pos=t=>{ let k=Math.max(0,(t-t0)/step); let i=Math.floor(k), f=k-i;
+        const P=j=>tiles[order[j%order.length]];
+        let a=P(i), b=P(i+1), q=f*step<step-mv?0:easeInOut((f*step-(step-mv))/mv);
+        let x=a.cx+(b.cx-a.cx)*q, y=a.cy+(b.cy-a.cy)*q;
+        x+=Math.sin(t*7.1)*4; y+=Math.cos(t*6.3)*3;
+        if(land!=null&&tl!=null&&t>=tl){ const L=tiles[land], p=easeOut((t-tl)/0.45); x=x+(L.cx-x)*p; y=y+(L.cy-y)*p; }
+        return [x,y]; };
+      up=t=>{ const [x,y]=pos(t); lens.style.transform=`translate(${x}px,${y}px)`;
+        tiles.forEach(T_=>{ const d=Math.hypot(T_.cx-x,T_.cy-y), k=clamp(1-d/(R*1.15)), kk=k*k*(3-2*k);
+          T_.e.style.transform=`scale(${1+0.10*kk})`; T_.e.style.zIndex=kk>0.05?2:1;
+          T_.e.querySelector('.lit').style.opacity=kk; T_.e.querySelector('.m').style.opacity=0.5+0.5*kk;
+          T_.e.querySelector('.m').style.fontSize=(40+12*kk)+'px'; T_.e.style.borderColor=`rgba(245,245,244,${0.13+0.5*kk})`; });
+        lens.style.zIndex=5; };
     }
     else if(S.type==='text_hook'&&!S.static&&LAYER==='behind'){
       const ki=S.key_line??1, tops=S.tops||[236,292,520]; const lines=S.lines.map((L,i)=>{

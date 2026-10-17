@@ -46,11 +46,12 @@ Every scene: `id`, `type`, `in`, `out`, `colors`, optional `layer` (`behind` = b
 | `stat` | `value`, `from`, `prefix`, `suffix`, `label`, `px` | — | behind |
 | `badge` | `text`, `sub` | — | front |
 | `cta` | `word`, `button`, `top`, `px` | `tap` | both |
+| `month_hunt` | `months` (default Jan–Dec), `cols`, `top`, `tile_w`, `tile_h`, `lens_r`, `step` (s per hop), `order`, `land` (tile index) | `land` | behind |
 
 ### Stage scenes (full-screen; the talking head shrinks into a circle top-left, 0.35 s transitions, whoosh in/out)
 | type | fields |
 |---|---|
-| `screen` | `media` (file in `input/media/`, video or image), or `slides:[{file, at}]` for screenshots; `device` auto/browser/phone; `url` (shown in the browser bar); `label`; `media_in` (s into the recording), `speed`; `zooms:[{at, rect:[x,y,w,h] 0–1 of the media, dur}]` (rect `[0,0,1,1]` = zoom back out); `highlights:[{at, until, rect, color}]`; `taps:[{at, x, y}]` |
+| `screen` | `media` (file in `input/media/`, video or image), or `slides:[{file, at}]` for screenshots; `device` auto/browser/phone; `pip: false` = voice-over demo (he's off camera: hard cut, no corner circle); `frame_h` = taller browser window (content px, e.g. 780) showing a zoomed column of a desktop page; `url` (shown in the browser bar); `label`; `media_in` (s into the recording), `speed`; `zooms:[{at, rect:[x,y,w,h] 0–1 of the media, dur}]` (rect `[0,0,1,1]` = zoom back out); `highlights:[{at, until, rect, color}]`; `taps:[{at, x, y}]` |
 | `bars` | `title`, `unit`, `bars:[{label, value, color, at, highlight}]`, `highlight` (index) |
 | `steps` | `title`, `steps:[{text, icon, color, at}]` (≤4) |
 | `compare` | `left/right: {title, items[], icon, at}` |
@@ -71,6 +72,8 @@ B-roll or graphics in the top half (y 0–960), you head-to-waist in the bottom 
     {"from": {"time": 13.2}, "to": {"time": 18.25}, "top": {"scenes": ["TOOLS", "SAVE"], "zoom": 1.15}}  // graphics: scene layers scaled into the top half
   ]}
 ```
+Graphics tops can be any scene; `month_hunt` (a magnifying glass hunting across 12 month tiles) is the opener for "best time / which month" reels: `{"scenes": ["HUNT"], "zoom": 1.0, "from": [0, 0], "to": [0, 0]}` (it's laid out for the top half already).
+
 Rules:
 - The **opener** segment (0–3.5 s, `overlay: "hook"`) carries the static hook on the seam and the series pill at the top; captions and SFX start at 3.5 s (`captions.hide_until`, `sound.quiet_until`). No `text_hook` scene and no badge when the opener is split.
 - **Back-to-back segments keep you in exactly the same place**: only the top half changes at the cut. Never put a full-frame moment shorter than ~2 s between two splits; extend the split instead.

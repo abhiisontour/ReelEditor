@@ -82,7 +82,7 @@ class Comp:
                 ax, ay = self.anchor; fx = ax + (fx - ax) * s; fy = ay + (fy - ay) * s
                 sp = self.rgba(f"{L.get('stage', '/none')}/{n:05d}.png")
                 st_img = self.stage.render(n, self.bd, sp if sp[0] is not None else None)
-                plate = self.stage.pip(st_img, plate, e, (fx, fy))
+                plate = self.stage.pip(st_img, plate, e, (fx, fy)) if self.stage.pip_on(t) else st_img
         for k in ("front", "caps"):
             c, al = self.rgba(f"{L[k]}/{n:05d}.png")
             if c is not None: plate = c * al + plate * (1 - al)

@@ -18,9 +18,13 @@ def media_info(path):
     return {"kind": "video", "w": w, "h": h, "dur": n / fps if fps else None, "fps": fps}
 
 
-def geometry(aspect, device):
-    """Content rect for the media inside its device frame (output px). Landscape -> browser window, portrait -> phone."""
+def geometry(aspect, device, frame_h=None):
+    """Content rect for the media inside its device frame (output px). Landscape -> browser window, portrait -> phone.
+    frame_h: taller browser window (content height px) that shows a zoomed column of a desktop page (voice-over demos)."""
     if device == "auto": device = "browser" if aspect >= 1 else "phone"
+    if device == "browser" and frame_h:
+        w = 880; h = int(frame_h); bar = 64; y = 380
+        return {"device": "browser", "x": 60, "y": y, "w": w, "h": h, "bar": bar}
     if device == "browser":
         w = 880; h = int(w / aspect); bar = 64; y = int(590 + (560 - h - bar) / 2) + bar
         return {"device": "browser", "x": 60, "y": y, "w": w, "h": h, "bar": bar}
@@ -35,7 +39,7 @@ def prepare(pr: Project):
         if s["type"] != "screen": continue
         files = s.get("slides") and [x["file"] for x in s["slides"]] or [s["media"]]
         info = media_info(pr.p("input", "media", files[0]))
-        g = geometry(info["w"] / info["h"], s.get("device", "auto")); g["media"] = info
+        g = geometry(info["w"] / info["h"], s.get("device", "auto"), s.get("frame_h")); g["media"] = info
         out["scenes"][s["id"]] = g
     pr.save("work/stage.json", out); return out
 
@@ -52,14 +56,23 @@ class Stage:
         self.caps = {}
 
     def mode(self, t):
-        """0 = normal talking head, 1 = fully on stage. 0.35 s transitions in and out."""
+        """0 = normal talking head, 1 = fully on stage. 0.35 s transitions in and out; hard cuts for pip:false
+        (voice-over demos: he isn't on camera, the stage simply replaces the frame)."""
         best = 0.0
         for t0, t1, s in self.scenes:
+            if s.get("pip", True) is False:
+                if t0 <= t < t1: best = 1.0
+                continue
             if t0 - 0.0 <= t < t1 + 0.35:
                 best = max(best, EASE((t - t0) / 0.35) * (1 - EASE((t - t1) / 0.35)))
         return best
 
+    def pip_on(self, t):
+        a = self.active(t); return a is None or a[2].get("pip", True) is not False
+
     def active(self, t):
+        for t0, t1, s in self.scenes:          # a scene that is live wins over the tail of the previous one
+            if t0 <= t < t1: return t0, t1, s
         for t0, t1, s in self.scenes:
             if t0 <= t < t1 + 0.35: return t0, t1, s
         return None
@@ -92,7 +105,7 @@ class Stage:
         for z in s.get("zooms", []):
             tz = at(z.get("at"), self.ws, 0); d = z.get("dur", 0.45)
             if t < tz: break
-            p = EASE((t - tz) / d); tgt = z.get("rect", [0, 0, 1, 1])
+            p = 1.0 if d <= 0 else EASE((t - tz) / d); tgt = z.get("rect", [0, 0, 1, 1])
             r = [prev[i] + (tgt[i] - prev[i]) * p for i in range(4)]; prev = tgt if p >= 1 else r
         return r
 

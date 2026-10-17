@@ -26,7 +26,7 @@ Ask only for what's missing, in ONE AskUserQuestion: **text hook** (offer 2–3 
 - **Split screen** like his reference: B-roll or graphics in the top half (0–960), him head-to-waist in the bottom half with hands visible (scale 0.72, desk faded under the hands), hard cuts.
 - **Opener 0–3.5 s**: B-roll in the top half from frame 0 (the visual hook: real motion, e.g. comments scrolling), **static** 2-line text hook on the seam (no animation at all), series pill "DAY NN/75 · OF MAKING YOUR TRAVEL EASY" at the top. No captions, no SFX, no other graphics until 3.5 s.
 - **Rhythm**: split while a clip/graphic carries the idea, full frame while his face carries it. Back-to-back splits keep him in exactly the same place (only the top half cuts). **Never a full-frame moment shorter than ~2 s between two splits**; extend the split instead (a 0.6 s split→full→split flash is too quick for the eye).
-- Missing B-roll → graphics top (`icon_tiles`/`cards` 3D chips) and say so in the compass.
+- Missing B-roll → graphics top (`icon_tiles`/`cards` 3D chips, or `month_hunt` for best-time/which-month reels) and say so in the compass.
 
 ## 1. Analyze (≈12 min, run in background and poll with an until-loop)
 ```bash
@@ -48,6 +48,7 @@ Read `$P/words.json`, `$P/work/analysis.json`, `$P/compass.json`. Then:
    - `screen`: run `python3 -m reelkit.run media-sheet $P --name <file>` and look at the sheet. Set `media_in`/`speed` so the recording's action lines up with his words; add `zooms` (rect on what he names, then back to `[0,0,1,1]`), `highlights` on the button/field he mentions, `taps` where he clicks; `url` = the site's address, `label` short (e.g. "Live demo"). Landscape = browser frame, portrait = phone frame (captions hide during phone demos).
    - ANIMATION stubs (`title_card` with `todo`): replace with `bars` (numbers over time; real numbers from the script or research, never invented), `steps` (how-to), `compare` (A vs B) or `title_card`. Remove the `todo` key.
    - Keep talking-head scenes out of stage windows.
+   - **Voice-over demos** (he recorded only audio for the demo; the talking-head clip is just the hook): make a clip from the audio over a still of his last frame (`02_voiceover.mp4`), speed it to match the hook clip (`atempo`), and set `pip: false` + `frame_h: 780` on the screen scenes. Split the recording into one `screen` scene per spoken step (own `media_in`/`speed`, a zoom + highlight on what he names), and skip ads and dead time.
 7. **Camera** (full-frame parts only): a dur-0 key back to 1.0 where a split hands over to full frame; push 1.05 on a number/key word; **a snap with dur 0 at every jump-cut time** (`words.json.cut_frames`/30); push 1.05 on the CTA.
 8. **Cover**: open `$P/qc/closing_faces.jpg` and set `cover.frame` to the best closing smile (eyes open, looking at camera). With a split opener the cover is the opener's look (B-roll + hook) with that smile below.
 9. Sound: keep defaults (`whoosh: "layout"` = a whoosh only when cutting from full frame into a split; nothing before 3.5 s; themed sounds on icon objects; chime on the last word; music ducked). Only add `remove`/`extra_cues` if the script needs it.

@@ -14,7 +14,7 @@ SUMMARY = {
     "icon_tiles": lambda s: "3D tiles: " + ", ".join(f"{i['title']} ({i.get('object', i.get('icon',''))})" for i in s["items"]),
     "stat": lambda s: f"Count-up {s.get('prefix','')}{s.get('value')}{s.get('suffix','')} — {s.get('label','')}",
     "badge": lambda s: f"Series badge {s.get('text','')} {s.get('sub','')}",
-    "screen": lambda s: f"DEMO: {s.get('media')} in a {s.get('device','auto')} frame (you in a corner circle); {len(s.get('zooms',[]))} zooms, {len(s.get('highlights',[]))} highlights, {len(s.get('taps',[]))} taps",
+    "screen": lambda s: f"DEMO: {s.get('media')} from {s.get('media_in',0)}s at {s.get('speed',1)}x in a {s.get('device','auto')} frame ({'full screen, voice-over' if s.get('pip', True) is False else 'you in a corner circle'}){' · ' + s['label'] if s.get('label') else ''}; {len(s.get('zooms',[]))} zooms, {len(s.get('highlights',[]))} highlights, {len(s.get('taps',[]))} taps",
     "bars": lambda s: f"ANIMATION bar chart: {s.get('title','')} (" + ", ".join(f"{b['label']} {b['value']}" for b in s.get('bars', [])) + ")",
     "steps": lambda s: f"ANIMATION steps: " + " → ".join(x['text'] for x in s.get('steps', [])),
     "compare": lambda s: f"ANIMATION compare: {(s.get('left') or {}).get('title','')} vs {(s.get('right') or {}).get('title','')}",
@@ -54,7 +54,7 @@ def render_md(C, W):
     if not C["edit"]["cuts"]: L.append("| — | none | | |")
     demos = [s for s in C["scenes"] if s["type"] in ("screen", "bars", "steps", "compare", "title_card")]
     if demos:
-        L += ["", "**Demo / animation segments** (you shrink into a corner circle while these play):"] + [f"- {s['id']}: {_t(s.get('in'), ws)} → {_t(s.get('out'), ws) if s.get('out') else 'end'} — {s.get('note') or SUMMARY[s['type']](s)}" for s in demos]
+        L += ["", "**Demo / animation segments** (you shrink into a corner circle while these play, unless marked voice-over):"] + [f"- {s['id']}: {_t(s.get('in'), ws)} → {_t(s.get('out'), ws) if s.get('out') else 'end'} — {s.get('note') or SUMMARY[s['type']](s)}" for s in demos]
     fl = C["edit"].get("flags", [])
     if fl:
         L += ["", "**Script vs. speech flags:**"] + [f"- {f['type'].replace('_',' ')} at {f['at']:.2f}s: {f.get('asr') or f.get('script')}" for f in fl]
