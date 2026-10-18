@@ -162,22 +162,30 @@ Promise.all([fetch(PRJ+'/words.json').then(r=>r.json()),fetch(PRJ+'/compass.json
       const sky=el('div','',{position:'absolute',inset:'0'}); const haze=el('div','',{position:'absolute',inset:'0',background:'radial-gradient(120% 90% at 50% 10%,rgba(255,255,255,.55),rgba(255,255,255,0) 60%)',opacity:0});
       const sun=el('div','',{position:'absolute',width:'96px',height:'96px',borderRadius:'50%'});
       const ground=el('div','',{position:'absolute',left:'0',right:'0',top:(Hd-74)+'px',bottom:'0',background:'linear-gradient(180deg,#1c1a20,#0c0b0e)'});
-      const gx=Wd-372, gw=320;                                                                  // gateway (generic dome + arch + two minarets)
-      const gate=el('div','',{position:'absolute',left:gx+'px',top:(Hd-74-322)+'px',width:gw+'px',height:'323px'},
-        `<svg viewBox="0 0 230 232" width="320" height="323"><defs><linearGradient id="gt${S.id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a2530"/><stop offset="1" stop-color="#121016"/></linearGradient></defs>
-         <path d="M20 232 V96 h14 V232 Z M196 232 V96 h14 V232 Z" fill="url(#gt${S.id})"/><path d="M14 98 h26 l-13 -26 Z M190 98 h26 l-13 -26 Z" fill="url(#gt${S.id})"/>
-         <path d="M48 232 V120 H182 V232 Z" fill="url(#gt${S.id})"/><path d="M60 122 Q115 20 170 122 Z" fill="url(#gt${S.id})"/><path d="M112 34 h6 v-18 h-6 Z" fill="#2a2530"/>
-         <path d="M92 232 V176 Q115 140 138 176 V232 Z" fill="#050507"/><path d="M60 122 Q115 20 170 122" fill="none" stroke="rgba(255,190,140,.35)" stroke-width="2"/></svg>`);
-      const doorX=gx+160, N=S.queue??13, sp=50;
+      const gx=Wd-372, gw=320;                                                                  // attraction entrance: ticket gate + Ferris wheel behind (neutral "tourist spot")
+      const wheel=el('div','',{position:'absolute',left:(gx-150)+'px',top:(Hd-74-340)+'px',width:'300px',height:'340px'},
+        `<svg viewBox="0 0 300 340" width="300" height="340"><g opacity=".9"><path d="M150 150 L90 340 M150 150 L210 340" stroke="#2a2530" stroke-width="10" stroke-linecap="round"/>
+         <g class="spin" style="transform-origin:150px 150px"><circle cx="150" cy="150" r="128" fill="none" stroke="#2a2530" stroke-width="7"/><circle cx="150" cy="150" r="104" fill="none" stroke="#2a2530" stroke-width="3"/>
+         ${Array.from({length:10},(_,k)=>{const an=k*Math.PI/5, x=150+128*Math.cos(an), y=150+128*Math.sin(an); return `<path d="M150 150 L${x.toFixed(1)} ${y.toFixed(1)}" stroke="#2a2530" stroke-width="3"/><rect x="${(x-11).toFixed(1)}" y="${(y-4).toFixed(1)}" width="22" height="18" rx="5" fill="${['#FBBF24','#FF8A5B','#FF5D73','#F472B6','#A78BFA','#60A5FA','#34D399'][k%7]}" opacity=".85"/>`;}).join('')}</g>
+         <circle cx="150" cy="150" r="10" fill="#3a3440"/></g></svg>`);
+      const gate=el('div','',{position:'absolute',left:gx+'px',top:(Hd-74-250)+'px',width:gw+'px',height:'252px'},
+        `<svg viewBox="0 0 320 252" width="320" height="252"><defs><linearGradient id="gt${S.id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2d2833"/><stop offset="1" stop-color="#141217"/></linearGradient></defs>
+         <rect x="20" y="40" width="34" height="212" rx="6" fill="url(#gt${S.id})"/><rect x="266" y="40" width="34" height="212" rx="6" fill="url(#gt${S.id})"/>
+         <rect x="6" y="18" width="308" height="44" rx="14" fill="url(#gt${S.id})"/><rect x="104" y="0" width="112" height="40" rx="12" fill="#FBBF24"/>
+         <g transform="translate(142 6) scale(1.2)"><path d="${ICON.ticket}" fill="#141217"/></g>
+         <rect x="70" y="150" width="70" height="102" rx="10" fill="#1f1c24"/><rect x="78" y="160" width="54" height="34" rx="6" fill="rgba(255,200,120,.35)"/>
+         <rect x="184" y="200" width="8" height="52" rx="3" fill="#3a3440"/><rect x="246" y="200" width="8" height="52" rx="3" fill="#3a3440"/><circle cx="188" cy="198" r="7" fill="#FBBF24"/><circle cx="250" cy="198" r="7" fill="#FBBF24"/><path d="M190 204 Q219 232 248 204" fill="none" stroke="#FF5D73" stroke-width="5" stroke-linecap="round"/>
+         <path d="M6 62 h308" stroke="rgba(255,190,140,.35)" stroke-width="2"/></svg>`);
+      const doorX=gx+220, N=S.queue??13, sp=50;
       const person=c=>`<svg viewBox="0 0 24 52" width="36" height="78"><circle cx="12" cy="8" r="7" fill="${c}"/><path d="M3 50 V26 Q3 16 12 16 Q21 16 21 26 V50 Z" fill="${c}"/></svg>`;
       const pcols=['#F5F5F4','#FBBF24','#FF8A5B','#F472B6','#A78BFA','#60A5FA','#34D399'];
       const ppl=Array.from({length:N},(_,i)=>{const e=el('div','',{position:'absolute',left:'0',top:(Hd-74-78)+'px',width:'36px',height:'78px',opacity:0},person(pcols[i%pcols.length])); return e;});
       const walker=el('div','',{position:'absolute',left:'0',top:(Hd-74-78)+'px',width:'36px',height:'78px',opacity:0},person('#FBBF24'));
       const clock=el('div','',{position:'absolute',left:'28px',top:'24px',display:'flex',alignItems:'center',gap:'12px',padding:'10px 18px',borderRadius:'999px',background:'rgba(9,9,10,.55)',border:'1.5px solid rgba(245,245,244,.18)',font:'600 32px Inter',color:'#F5F5F4',letterSpacing:'.04em'});
-      sky.appendChild(haze); panel.append(sky,sun,ground,gate,...ppl,walker,clock); root.appendChild(panel);
+      sky.appendChild(haze); panel.append(sky,sun,wheel,ground,gate,...ppl,walker,clock); root.appendChild(panel);
       const S0=['#2E2452','#FF8A5B'], S1=['#3E7FE0','#FFF1C4'];
       const hourLab=h=>{const H=Math.floor(h), m=h-H; const hh=((H+11)%12)+1; return `${hh}${m>=0.5?':30':''} ${H<12?'AM':'PM'}`;};
-      up=t=>{ const k=t-t0; let p=easeInOut(k/climb);
+      up=t=>{ const k=t-t0; let p=easeInOut(k/climb); wheel.querySelector('.spin').style.transform=`rotate(${t*14}deg)`;
         let back=0; if(tl!=null&&t>=tl){ back=easeOut((t-tl)/0.6); p=p*(1-back); }
         sky.style.background=`linear-gradient(180deg,${mix(S0[0],S1[0],p)},${mix(S0[1],S1[1],p)})`; haze.style.opacity=0.55*p;
         const a=Math.PI*(1-0.55*p-0.06), cx=Wd*0.40+Wd*0.40*Math.cos(a), cy=(Hd-74)-(Hd-150)*Math.sin(a)*(0.25+0.75*p);

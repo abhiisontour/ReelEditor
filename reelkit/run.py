@@ -43,7 +43,7 @@ def stage_layers(pr, st, frames=None):
     C = pr.compass; W = pr.load("words.json"); n = frames or W["frames"]
     if any(s["type"] in stage.STAGE_TYPES for s in C.get("scenes", [])): stage.prepare(pr)
     hc = H(st.s.get("enhance"), C["captions"], C["framing"], C.get("scenes"), W["words"])
-    hm = H(C.get("scenes"), C.get("palette"), W["words"])
+    hm = H(C.get("scenes"), C.get("palette"), W["words"], open(os.path.join(WEB, "motion.html")).read())   # scene-library edits re-render too
     if frames or st.changed("captions", hc):
         captions.build(pr); node_render(os.path.join(WEB, "captions.html"), f"p={pr.root}", pr.p("layers", "captions"), n)
         if not frames: st.done("captions", hc)
