@@ -32,9 +32,9 @@ def windows(C, words):
 
 class Reader:
     """Sequential frame reader for a B-roll clip, normalised to 30 fps and cropped to fill 1080 x seam."""
-    def __init__(self, path, t_in, crop, seam):
-        self.path, self.t_in, self.seam = path, t_in, seam; self.p = None; self.pos = -1; self.last = None
-        vf = "fps=30,"
+    def __init__(self, path, t_in, crop, seam, speed=1.0):
+        self.path, self.t_in, self.seam, self.speed = path, t_in, seam, speed; self.p = None; self.pos = -1; self.last = None
+        vf = (f"setpts=PTS/{speed}," if abs(speed - 1) > 1e-3 else "") + "fps=30,"
         vf += (f"crop={crop[2]}:{crop[3]}:{crop[0]}:{crop[1]},scale=1080:{seam}:flags=lanczos" if crop else
                f"scale=1080:{seam}:force_original_aspect_ratio=increase:flags=lanczos,crop=1080:{seam}")
         self.vf = vf
@@ -42,7 +42,7 @@ class Reader:
     def get(self, k):
         if self.p is None or k < self.pos or k > self.pos + 60:
             if self.p: self.p.kill()
-            self.p = subprocess.Popen(["ffmpeg", "-v", "error", "-ss", f"{self.t_in + k / FPS:.3f}", "-i", self.path, "-vf", self.vf,
+            self.p = subprocess.Popen(["ffmpeg", "-v", "error", "-ss", f"{self.t_in + k * self.speed / FPS:.3f}", "-i", self.path, "-vf", self.vf,
                                        "-f", "rawvideo", "-pix_fmt", "bgr24", "-"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
             self.pos = k - 1
         while self.pos < k:
@@ -88,8 +88,13 @@ class Split:
         if T.get("media"):
             key = (a, T["media"])
             if key not in self.readers:
-                self.readers[key] = Reader(self.pr.p("input", "media", T["media"]), float(T.get("in", 0)), T.get("crop"), self.seam)
-            return self.readers[key].get(n - a).astype(np.float32) * (1 - self.shade)
+                self.readers[key] = Reader(self.pr.p("input", "media", T["media"]), float(T.get("in", 0)), T.get("crop"), self.seam, float(T.get("speed", 1.0)))
+            img = self.readers[key].get(n - a).astype(np.float32)
+            img = self._marks(img, n, T)
+            img = img * (1 - self.shade * T.get("shade", 1.0))
+            c, al = self._rgba(f"{L['front']}/{n:05d}.png")      # notes/callouts that belong to this split window
+            if c is not None: img = c[:self.seam] * al[:self.seam] + img * (1 - al[:self.seam])
+            return img
         base = bd[:self.seam] * (1 - self.shade * 0.5)       # graphics: scene layers scaled into the middle of the top half
         k = float(T.get("zoom", 1.15)); fx, fy = T.get("from", [520, 430]); tx, ty = T.get("to", [540, 470])
         M = np.float32([[k, 0, tx - fx * k], [0, k, ty - fy * k]])
@@ -100,6 +105,23 @@ class Split:
                 al = np.clip(cv2.warpAffine(al, M, (W, H), flags=cv2.INTER_CUBIC), 0, 1)[:self.seam, :, None]
                 base = c * al + base * (1 - al)
         return base
+
+    def _marks(self, img, n, T):
+        """Highlight boxes on a B-roll / screen-recording top: rect in SOURCE pixels [x, y, w, h], fired on words."""
+        hl = T.get("highlights") or []
+        if not hl: return img
+        cr = T.get("crop"); sx = 1080 / cr[2]; sy = self.seam / cr[3]
+        t = n / FPS
+        for h in hl:
+            ta = at(h.get("at"), self.c.words, 0); tb = at(h.get("until"), self.c.words, 1e9)
+            if not (ta <= t < tb): continue
+            p = min(1, (t - ta) / 0.25); p = 1 - (1 - p) ** 3
+            x, y, w, hh = h["rect"]; ax, ay = int((x - cr[0]) * sx), int((y - cr[1]) * sy); bx, by = int((x + w - cr[0]) * sx), int((y + hh - cr[1]) * sy)
+            from .common import PALETTE
+            col = tuple(int(v) for v in bytes.fromhex(PALETTE.get(h.get("color", "sun"), "#FBBF24")[1:])[::-1])
+            ov = img.copy(); cv2.rectangle(ov, (ax, ay), (bx, by), col, -1, cv2.LINE_AA); img = img * (1 - 0.12 * p) + ov * 0.12 * p
+            ov = img.copy(); cv2.rectangle(ov, (ax, ay), (bx, by), col, 7, cv2.LINE_AA); img = img * (1 - p) + ov * p
+        return img
 
     def _caption(self, n, img, L):
         c, al = self._rgba(f"{L['caps']}/{n:05d}.png")
