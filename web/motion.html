@@ -72,6 +72,49 @@ const ICON={wrench:'M14.7 6.3a4 4 0 0 0-5.2 5.2l-6.2 6.2a1.6 1.6 0 0 0 2.3 2.3l6
  clock:'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 11h-5v-2h3V6h2z', calendar:'M19 4h-1V2h-2v2H8V2H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 16H5V9h14z',
  bag:'M18 6h-2a4 4 0 0 0-8 0H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2zm-6-2a2 2 0 0 1 2 2h-4a2 2 0 0 1 2-2z', map:'M20.5 3 15 5.1 9 3 3.4 4.9a.5.5 0 0 0-.4.5v15.1a.5.5 0 0 0 .7.5L9 18.9l6 2.1 5.6-1.9a.5.5 0 0 0 .4-.5V3.5a.5.5 0 0 0-.5-.5zM15 19l-6-2.1V5l6 2.1z',
  phone:'M17 1H7a2 2 0 0 0-2 2v18a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2zm0 18H7V5h10z', sun:'M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10zM11 1h2v3h-2zm0 19h2v3h-2zM1 11h3v2H1zm19 0h3v2h-3z'};
+
+const FOOD={
+ samosa:`<defs><linearGradient id="fs1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F6C46B"/><stop offset=".55" stop-color="#D98A2B"/><stop offset="1" stop-color="#9A5414"/></linearGradient><linearGradient id="fs2" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#B9681C"/><stop offset="1" stop-color="#7A3F0E"/></linearGradient></defs>
+  <ellipse cx="50" cy="86" rx="38" ry="6" fill="rgba(0,0,0,.35)"/><path d="M14 80 L50 14 L58 30 L86 80 Z" fill="url(#fs1)"/><path d="M58 30 L86 80 L66 82 Z" fill="url(#fs2)"/>
+  <path d="M16 80 Q50 88 86 80" fill="none" stroke="#7A3F0E" stroke-width="3" stroke-dasharray="3 4"/><path d="M50 18 L28 64" stroke="rgba(255,255,255,.45)" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="40" cy="58" r="1.6" fill="#7A3F0E"/><circle cx="52" cy="66" r="1.4" fill="#7A3F0E"/><circle cx="46" cy="44" r="1.3" fill="#7A3F0E"/>`,
+ kachori:`<defs><radialGradient id="fk1" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#F8D488"/><stop offset=".6" stop-color="#D89436"/><stop offset="1" stop-color="#8E5016"/></radialGradient></defs>
+  <ellipse cx="50" cy="84" rx="38" ry="6" fill="rgba(0,0,0,.35)"/><ellipse cx="50" cy="56" rx="38" ry="26" fill="url(#fk1)"/>
+  <path d="M30 50 Q42 40 50 52 Q58 42 70 50" fill="none" stroke="#8E5016" stroke-width="3" stroke-linecap="round"/><path d="M40 60 Q50 54 60 60" fill="none" stroke="#A8641F" stroke-width="2.4" stroke-linecap="round"/>
+  <ellipse cx="38" cy="42" rx="10" ry="4" fill="rgba(255,255,255,.45)"/>`,
+ dosa:`<defs><linearGradient id="fd1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F7CF7A"/><stop offset=".6" stop-color="#E0A040"/><stop offset="1" stop-color="#A86418"/></linearGradient></defs>
+  <ellipse cx="50" cy="80" rx="44" ry="12" fill="#E9ECEF"/><ellipse cx="50" cy="78" rx="40" ry="9" fill="#F7F8FA"/>
+  <path d="M8 66 L84 52 Q94 58 88 70 L14 78 Q6 74 8 66 Z" fill="url(#fd1)"/><path d="M14 68 L84 55" stroke="rgba(255,255,255,.5)" stroke-width="3" stroke-linecap="round"/>
+  <ellipse cx="80" cy="34" rx="12" ry="7" fill="#C8CDD3"/><ellipse cx="80" cy="32" rx="10" ry="5" fill="#E8792B"/><ellipse cx="58" cy="34" rx="10" ry="6" fill="#C8CDD3"/><ellipse cx="58" cy="32" rx="8" ry="4.2" fill="#F4F1E6"/>`,
+ lassi:`<defs><linearGradient id="fl1" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="rgba(255,255,255,.55)"/><stop offset=".5" stop-color="rgba(255,255,255,.15)"/><stop offset="1" stop-color="rgba(255,255,255,.4)"/></linearGradient><linearGradient id="fl2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFF6DD"/><stop offset="1" stop-color="#F3D9A0"/></linearGradient></defs>
+  <ellipse cx="50" cy="90" rx="24" ry="5" fill="rgba(0,0,0,.35)"/><path d="M30 20 L70 20 L64 88 L36 88 Z" fill="url(#fl2)"/><path d="M30 20 L70 20 L64 88 L36 88 Z" fill="url(#fl1)"/>
+  <ellipse cx="50" cy="22" rx="20" ry="4" fill="#FFFDF4"/><circle cx="44" cy="22" r="1.6" fill="#E8792B"/><circle cx="55" cy="21" r="1.4" fill="#E8792B"/><circle cx="50" cy="24" r="1.2" fill="#3FA34D"/>
+  <path d="M60 4 L56 30" stroke="#FF5D73" stroke-width="4" stroke-linecap="round"/><path d="M36 30 L39 82" stroke="rgba(255,255,255,.7)" stroke-width="3" stroke-linecap="round"/>`,
+ chai:`<defs><linearGradient id="fc1" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#C8643A"/><stop offset=".45" stop-color="#E08A5A"/><stop offset="1" stop-color="#8E3E1E"/></linearGradient></defs>
+  <ellipse cx="50" cy="88" rx="28" ry="5" fill="rgba(0,0,0,.35)"/><path d="M24 36 L76 36 L68 86 L32 86 Z" fill="url(#fc1)"/><ellipse cx="50" cy="36" rx="26" ry="7" fill="#9E4A24"/><ellipse cx="50" cy="37" rx="22" ry="5" fill="#C9935C"/>
+  <path d="M40 26 Q36 18 42 12 M52 26 Q48 16 55 9 M62 26 Q58 19 63 13" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="3" stroke-linecap="round"/><path d="M31 44 L36 80" stroke="rgba(255,255,255,.35)" stroke-width="3" stroke-linecap="round"/>`,
+ momos:`<defs><radialGradient id="fm1" cx=".4" cy=".3" r=".8"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".7" stop-color="#ECE4D6"/><stop offset="1" stop-color="#C9BBA4"/></radialGradient><g id="fmo"><path d="M-16 8 Q-18 -8 0 -14 Q18 -8 16 8 Q0 14 -16 8 Z" fill="url(#fm1)"/><path d="M-6 -12 L-3 -2 M0 -14 L0 -3 M6 -12 L3 -2" stroke="#BFAF95" stroke-width="1.8" stroke-linecap="round"/></g></defs>
+  <ellipse cx="50" cy="84" rx="40" ry="8" fill="#5A3A22"/><ellipse cx="50" cy="82" rx="38" ry="6" fill="#7A5232"/>
+  <use href="#fmo" x="32" y="66"/><use href="#fmo" x="68" y="66"/><use href="#fmo" x="50" y="50"/><circle cx="84" cy="40" r="7" fill="#C8341F"/><circle cx="82" cy="38" r="2" fill="rgba(255,255,255,.5)"/>`,
+ thali:`<defs><radialGradient id="ft1" cx=".45" cy=".35" r=".8"><stop offset="0" stop-color="#F4F6F8"/><stop offset=".7" stop-color="#B9C0C8"/><stop offset="1" stop-color="#7D8590"/></radialGradient></defs>
+  <ellipse cx="50" cy="56" rx="46" ry="32" fill="url(#ft1)"/><ellipse cx="50" cy="56" rx="38" ry="25" fill="#D9DEE3"/>
+  <ellipse cx="30" cy="46" rx="10" ry="6" fill="#9AA2AB"/><ellipse cx="30" cy="45" rx="8" ry="4.5" fill="#F2B233"/>
+  <ellipse cx="52" cy="40" rx="10" ry="6" fill="#9AA2AB"/><ellipse cx="52" cy="39" rx="8" ry="4.5" fill="#C8341F"/>
+  <ellipse cx="72" cy="48" rx="10" ry="6" fill="#9AA2AB"/><ellipse cx="72" cy="47" rx="8" ry="4.5" fill="#4F9D3A"/>
+  <ellipse cx="44" cy="66" rx="16" ry="8" fill="#E2B36A"/><ellipse cx="44" cy="65" rx="12" ry="5" fill="#EFC883"/><ellipse cx="66" cy="66" rx="8" ry="5" fill="#FFFFFF"/>`,
+ jalebi:`<defs><linearGradient id="fj1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFB13B"/><stop offset="1" stop-color="#E8641B"/></linearGradient></defs>
+  <ellipse cx="50" cy="84" rx="40" ry="7" fill="rgba(0,0,0,.35)"/>
+  <path d="M30 56 m-14 0 a14 14 0 1 0 28 0 a10 10 0 1 0 -20 0 a6 6 0 1 0 12 0 a2 2 0 1 0 -4 0" fill="none" stroke="url(#fj1)" stroke-width="5" stroke-linecap="round"/>
+  <path d="M68 52 m-16 0 a16 16 0 1 0 32 0 a11 11 0 1 0 -22 0 a6 6 0 1 0 12 0" fill="none" stroke="url(#fj1)" stroke-width="5" stroke-linecap="round"/>
+  <path d="M50 74 m-12 0 a12 12 0 1 0 24 0 a8 8 0 1 0 -16 0" fill="none" stroke="url(#fj1)" stroke-width="5" stroke-linecap="round"/>`,
+ dalbati:`<defs><radialGradient id="fb1" cx=".4" cy=".3" r=".8"><stop offset="0" stop-color="#E9B66E"/><stop offset=".65" stop-color="#B9772E"/><stop offset="1" stop-color="#7A4615"/></radialGradient></defs>
+  <ellipse cx="50" cy="84" rx="44" ry="10" fill="#5A3A22"/><ellipse cx="50" cy="82" rx="42" ry="8" fill="#7A5232"/>
+  <circle cx="30" cy="66" r="14" fill="url(#fb1)"/><circle cx="54" cy="68" r="14" fill="url(#fb1)"/><circle cx="42" cy="50" r="13" fill="url(#fb1)"/>
+  <path d="M34 46 L38 56 M50 62 L52 72 M26 62 L30 70" stroke="#7A4615" stroke-width="2" stroke-linecap="round"/>
+  <ellipse cx="38" cy="44" rx="5" ry="2.5" fill="rgba(255,255,255,.5)"/><path d="M38 40 Q42 46 40 54" stroke="#FFE08A" stroke-width="3" fill="none" stroke-linecap="round" opacity=".8"/>
+  <ellipse cx="80" cy="60" rx="14" ry="8" fill="#9AA2AB"/><ellipse cx="80" cy="58" rx="12" ry="6" fill="#F2B233"/><circle cx="76" cy="57" r="1.5" fill="#C8341F"/><circle cx="83" cy="59" r="1.3" fill="#3FA34D"/>`
+};
+const foodSVG=(k,h)=>`<svg viewBox="0 0 100 100" width="${h}" height="${h}" style="overflow:visible">${FOOD[k]||''}</svg>`;
 const svgIcon=(name,size=56,fill='#fff')=> name==='rupee' ? `<span style="font:800 ${size*0.9}px 'Inter Display',Inter;color:${fill}">₹</span>` :
   `<svg width="${size}" height="${size}" viewBox="0 0 24 24"><path d="${ICON[name]||ICON.star}" fill="${fill}"/></svg>`;
 const lighten=(h,k)=>{const c=hex(h).map(v=>Math.round(v+(255-v)*k));return `rgb(${c})`}, darken=(h,k)=>{const c=hex(h).map(v=>Math.round(v*(1-k)));return `rgb(${c})`};
@@ -112,11 +155,11 @@ Promise.all([fetch(PRJ+'/words.json').then(r=>r.json()),fetch(PRJ+'/compass.json
       // Visual hook for "find the best month": 12 dark-glass month tiles; a glossy magnifying glass hunts across them,
       // lighting up and enlarging the tile under the lens. Optional S.land (tile index) + part 'land': the lens settles there.
       const M=S.months||['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], NC=S.cols||4, NR=Math.ceil(M.length/NC);
-      const tw=S.tile_w||196, th=S.tile_h||118, gap=20, gw=NC*tw+(NC-1)*gap, x0=(S.cx||500)-gw/2, y0=S.top||330;
+      const FS=S.font||40, tw=S.tile_w||196, th=S.tile_h||118, gap=20, gw=NC*tw+(NC-1)*gap, x0=(S.cx||500)-gw/2, y0=S.top||330;
       const c0=col(cs[0]), c1=col(cs[1]||cs[0]), c2=col(cs[2]||cs[1]||cs[0]);
       const tiles=M.map((m,i)=>{ const r=Math.floor(i/NC), c=i%NC, x=x0+c*(tw+gap), y=y0+r*(th+gap);
         const e=el('div','a',{left:x+'px',top:y+'px',width:tw+'px',height:th+'px',borderRadius:'26px',background:'linear-gradient(160deg,rgba(245,245,244,.10),rgba(245,245,244,.03))',border:'1.5px solid rgba(245,245,244,.13)',boxShadow:'0 14px 30px rgba(0,0,0,.35)',overflow:'hidden'},
-          `<div class="lit" style="position:absolute;inset:0;opacity:0;background:linear-gradient(140deg,${c0},${c1} 55%,${c2})"></div><div class="gl" style="position:absolute;left:0;right:0;top:0;height:46%;background:linear-gradient(180deg,rgba(255,255,255,.22),rgba(255,255,255,0));opacity:.5"></div><div class="m" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:600 40px Inter;letter-spacing:.16em;text-transform:uppercase;color:#F5F5F4;opacity:.5">${m}</div>`);
+          `<div class="lit" style="position:absolute;inset:0;opacity:0;background:linear-gradient(140deg,${c0},${c1} 55%,${c2})"></div><div class="gl" style="position:absolute;left:0;right:0;top:0;height:46%;background:linear-gradient(180deg,rgba(255,255,255,.22),rgba(255,255,255,0));opacity:.5"></div><div class="m" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:600 ${FS}px Inter;letter-spacing:.16em;text-transform:uppercase;color:#F5F5F4;opacity:.5;white-space:nowrap">${S.art?foodSVG(S.art[i],th*0.94):m}</div>`);
         root.appendChild(e); return {e,cx:x+tw/2,cy:y+th/2}; });
       const R=S.lens_r||92, gid='lg'+S.id;
       const lens=el('div','a',{left:'0',top:'0',width:'1px',height:'1px'},
@@ -144,7 +187,7 @@ Promise.all([fetch(PRJ+'/words.json').then(r=>r.json()),fetch(PRJ+'/compass.json
         tiles.forEach(T_=>{ const d=Math.hypot(T_.cx-x,T_.cy-y), k=clamp(1-d/(R*1.15)), kk=k*k*(3-2*k);
           T_.e.style.transform=`scale(${1+0.10*kk})`; T_.e.style.zIndex=kk>0.05?2:1;
           T_.e.querySelector('.lit').style.opacity=kk; T_.e.querySelector('.m').style.opacity=0.5+0.5*kk;
-          T_.e.querySelector('.m').style.fontSize=(40+12*kk)+'px'; T_.e.style.borderColor=`rgba(245,245,244,${0.13+0.5*kk})`; });
+          if(S.art){ const mm=T_.e.querySelector('.m'); mm.style.opacity=1; mm.style.transform=`scale(${1+0.22*kk})`; mm.style.filter=`saturate(${0.75+0.25*kk}) brightness(${0.86+0.14*kk})`; T_.e.querySelector('.lit').style.opacity=0.45*kk; } else T_.e.querySelector('.m').style.fontSize=(FS*(1+0.3*kk))+'px'; T_.e.style.borderColor=`rgba(245,245,244,${0.13+0.5*kk})`; });
         lens.style.zIndex=5; };
     }
     else if(S.type==='text_hook'&&!S.static&&LAYER==='behind'){
